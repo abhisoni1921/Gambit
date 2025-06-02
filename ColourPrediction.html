@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Prediction Wheel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+
+        .stat {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 0 auto 30px;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            border: 10px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.3), 
+                        inset 0 0 20px rgba(255, 255, 255, 0.1),
+                        0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: idleRotate 20s linear infinite;
+        }
+
+        .wheel.spinning {
+            animation: none;
+        }
+
+        .segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: right bottom;
+        }
+
+        .segment:nth-child(1) { transform: rotate(0deg); }
+        .segment:nth-child(2) { transform: rotate(60deg); }
+        .segment:nth-child(3) { transform: rotate(120deg); }
+        .segment:nth-child(4) { transform: rotate(180deg); }
+        .segment:nth-child(5) { transform: rotate(240deg); }
+        .segment:nth-child(6) { transform: rotate(300deg); }
+
+        .segment::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            clip-path: polygon(0 0, 100% 0, 0 100%);
+            border-radius: 50%;
+        }
+
+        .red::before { background: linear-gradient(135deg, #ff6b6b, #e74c3c); }
+        .blue::before { background: linear-gradient(135deg, #74b9ff, #3498db); }
+        .green::before { background: linear-gradient(135deg, #55efc4, #2ecc71); }
+        .yellow::before { background: linear-gradient(135deg, #fdcb6e, #f1c40f); }
+        .purple::before { background: linear-gradient(135deg, #a29bfe, #9b59b6); }
+        .orange::before { background: linear-gradient(135deg, #fd79a8, #e67e22); }
+
+        .pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 40px solid #fff;
+            z-index: 10;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+        }
+
+        .pointer::after {
+            content: '';
+            position: absolute;
+            top: -35px;
+            left: -15px;
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .betting-section {
+            margin-bottom: 30px;
+        }
+
+        .color-bets {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .color-bet {
+            padding: 18px;
+            border-radius: 20px;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-weight: bold;
+            font-size: 1.1em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .color-bet::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .color-bet:hover::before {
+            left: 100%;
+        }
+
+        .color-bet:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .color-bet.selected {
+            border-color: white;
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.6);
+            animation: selectedPulse 2s infinite ease-in-out;
+        }
+
+        .red-bet { 
+            background: linear-gradient(135deg, #ff6b6b, #e74c3c);
+            box-shadow: 0 8px 20px rgba(231, 76, 60, 0.3);
+        }
+        .blue-bet { 
+            background: linear-gradient(135deg, #74b9ff, #3498db);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.3);
+        }
+        .green-bet { 
+            background: linear-gradient(135deg, #55efc4, #2ecc71);
+            box-shadow: 0 8px 20px rgba(46, 204, 113, 0.3);
+        }
+        .yellow-bet { 
+            background: linear-gradient(135deg, #fdcb6e, #f1c40f); 
+            color: #333;
+            box-shadow: 0 8px 20px rgba(241, 196, 15, 0.3);
+        }
+        .purple-bet { 
+            background: linear-gradient(135deg, #a29bfe, #9b59b6);
+            box-shadow: 0 8px 20px rgba(155, 89, 182, 0.3);
+        }
+        .orange-bet { 
+            background: linear-gradient(135deg, #fd79a8, #e67e22);
+            box-shadow: 0 8px 20px rgba(230, 126, 34, 0.3);
+        }
+
+        .bet-amount {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .bet-input {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            width: 120px;
+        }
+
+        .bet-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .bet-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .spin-btn {
+            padding: 18px 50px;
+            font-size: 1.4em;
+            font-weight: bold;
+            border: none;
+            border-radius: 35px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            background-size: 300% 300%;
+            animation: gradientShift 3s ease infinite;
+            color: white;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .spin-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.6s;
+        }
+
+        .spin-btn:hover::before {
+            left: 100%;
+        }
+
+        .spin-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .spin-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            animation: none;
+        }
+
+        .result {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .win {
+            background: rgba(46, 204, 113, 0.3);
+            border: 2px solid #2ecc71;
+        }
+
+        .lose {
+            background: rgba(231, 76, 60, 0.3);
+            border: 2px solid #e74c3c;
+        }
+
+        @keyframes idleRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes selectedPulse {
+            0% { box-shadow: 0 0 30px rgba(255, 255, 255, 0.6); }
+            50% { box-shadow: 0 0 50px rgba(255, 255, 255, 0.9); }
+            100% { box-shadow: 0 0 30px rgba(255, 255, 255, 0.6); }
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes spinGlow {
+            0% { box-shadow: 0 0 40px rgba(255, 255, 255, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.1), 0 10px 30px rgba(0, 0, 0, 0.2); }
+            50% { box-shadow: 0 0 60px rgba(255, 255, 255, 0.6), inset 0 0 30px rgba(255, 255, 255, 0.2), 0 15px 40px rgba(0, 0, 0, 0.3); }
+            100% { box-shadow: 0 0 40px rgba(255, 255, 255, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.1), 0 10px 30px rgba(0, 0, 0, 0.2); }
+        }
+
+        .spinning {
+            animation: pulse 0.5s infinite, spinGlow 1s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎯 Color Prediction Wheel</h1>
+        
+        <div class="stats">
+            <div class="stat">
+                <div>💰 Balance</div>
+                <div id="balance">1000</div>
+            </div>
+            <div class="stat">
+                <div>🎲 Spins</div>
+                <div id="spins">0</div>
+            </div>
+            <div class="stat">
+                <div>🏆 Wins</div>
+                <div id="wins">0</div>
+            </div>
+        </div>
+
+        <div class="wheel-container">
+            <div class="pointer"></div>
+            <div class="wheel" id="wheel">
+                <div class="segment red"></div>
+                <div class="segment blue"></div>
+                <div class="segment green"></div>
+                <div class="segment yellow"></div>
+                <div class="segment purple"></div>
+                <div class="segment orange"></div>
+            </div>
+        </div>
+
+        <div class="betting-section">
+            <h3>Choose Your Color:</h3>
+            <div class="color-bets">
+                <div class="color-bet red-bet" data-color="red">🔴 Red (3x)</div>
+                <div class="color-bet blue-bet" data-color="blue">🔵 Blue (3x)</div>
+                <div class="color-bet green-bet" data-color="green">🟢 Green (3x)</div>
+                <div class="color-bet yellow-bet" data-color="yellow">🟡 Yellow (3x)</div>
+                <div class="color-bet purple-bet" data-color="purple">🟣 Purple (3x)</div>
+                <div class="color-bet orange-bet" data-color="orange">🟠 Orange (3x)</div>
+            </div>
+        </div>
+
+        <div class="bet-amount">
+            <button class="bet-btn" onclick="adjustBet(-10)">-10</button>
+            <button class="bet-btn" onclick="adjustBet(-50)">-50</button>
+            <input type="number" class="bet-input" id="betAmount" value="10" min="1">
+            <button class="bet-btn" onclick="adjustBet(50)">+50</button>
+            <button class="bet-btn" onclick="adjustBet(10)">+10</button>
+        </div>
+
+        <button class="spin-btn" id="spinBtn" onclick="spinWheel()">🎯 SPIN THE WHEEL!</button>
+
+        <div class="result" id="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        let balance = 1000;
+        let totalSpins = 0;
+        let totalWins = 0;
+        let selectedColor = null;
+        let isSpinning = false;
+        let currentRotation = 0;
+
+        const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange'];
+        const wheel = document.getElementById('wheel');
+        const spinBtn = document.getElementById('spinBtn');
+        const result = document.getElementById('result');
+
+        // Color selection
+        document.querySelectorAll('.color-bet').forEach(bet => {
+            bet.addEventListener('click', function() {
+                document.querySelectorAll('.color-bet').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedColor = this.dataset.color;
+            });
+        });
+
+        function adjustBet(amount) {
+            const betInput = document.getElementById('betAmount');
+            let currentBet = parseInt(betInput.value) || 0;
+            let newBet = currentBet + amount;
+            
+            if (newBet < 1) newBet = 1;
+            if (newBet > balance) newBet = balance;
+            
+            betInput.value = newBet;
+        }
+
+        function updateStats() {
+            document.getElementById('balance').textContent = balance;
+            document.getElementById('spins').textContent = totalSpins;
+            document.getElementById('wins').textContent = totalWins;
+        }
+
+        function spinWheel() {
+            if (isSpinning) return;
+            
+            const betAmount = parseInt(document.getElementById('betAmount').value) || 0;
+            
+            if (!selectedColor) {
+                alert('Please select a color first!');
+                return;
+            }
+            
+            if (betAmount < 1) {
+                alert('Bet amount must be at least 1!');
+                return;
+            }
+            
+            if (betAmount > balance) {
+                alert('Insufficient balance!');
+                return;
+            }
+
+            isSpinning = true;
+            spinBtn.disabled = true;
+            wheel.classList.add('spinning');
+            result.style.display = 'none';
+
+            // Deduct bet from balance
+            balance -= betAmount;
+            totalSpins++;
+
+            // Random spin with more realistic physics
+            const minSpins = 8;
+            const maxSpins = 12;
+            const spins = Math.floor(Math.random() * (maxSpins - minSpins + 1)) + minSpins;
+            const finalAngle = Math.random() * 360;
+            const totalRotation = currentRotation + spins * 360 + finalAngle;
+            
+            // Stop the idle animation and apply the spin
+            wheel.style.animation = 'none';
+            wheel.style.transform = `rotate(${totalRotation}deg)`;
+            
+            // Update current rotation for next spin
+            currentRotation = totalRotation % 360;
+
+            // Determine winning color based on final angle
+            const segmentAngle = 60; // 360/6 colors
+            const normalizedAngle = (360 - (currentRotation % 360)) % 360;
+            const winningIndex = Math.floor(normalizedAngle / segmentAngle);
+            const winningColor = colors[winningIndex];
+
+            setTimeout(() => {
+                isSpinning = false;
+                spinBtn.disabled = false;
+                wheel.classList.remove('spinning');
+                
+                // Resume idle rotation from current position
+                wheel.style.animation = `idleRotate 20s linear infinite`;
+                wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+                // Check if player won
+                const won = selectedColor === winningColor;
+                const winAmount = won ? betAmount * 3 : 0;
+
+                if (won) {
+                    balance += winAmount;
+                    totalWins++;
+                    result.className = 'result win';
+                    result.innerHTML = `
+                        🎉 WINNER! 🎉<br>
+                        Color: ${winningColor.toUpperCase()}<br>
+                        Won: ${winAmount} coins!
+                    `;
+                } else {
+                    result.className = 'result lose';
+                    result.innerHTML = `
+                        😔 Better luck next time!<br>
+                        Color: ${winningColor.toUpperCase()}<br>
+                        Lost: ${betAmount} coins
+                    `;
+                }
+
+                result.style.display = 'block';
+                updateStats();
+
+                // Reset selection
+                document.querySelectorAll('.color-bet').forEach(b => b.classList.remove('selected'));
+                selectedColor = null;
+
+                // Check if player is out of money
+                if (balance === 0) {
+                    setTimeout(() => {
+                        if (confirm('Game Over! You\'re out of coins. Start over with 1000 coins?')) {
+                            balance = 1000;
+                            totalSpins = 0;
+                            totalWins = 0;
+                            currentRotation = 0;
+                            wheel.style.animation = `idleRotate 20s linear infinite`;
+                            wheel.style.transform = `rotate(0deg)`;
+                            updateStats();
+                            result.style.display = 'none';
+                        }
+                    }, 2000);
+                }
+            }, 4000);
+        }
+
+        // Initialize wheel position
+        function initializeWheel() {
+            wheel.style.transform = `rotate(${currentRotation}deg)`;
+            updateStats();
+        }
+
+        // Initialize
+        initializeWheel();
+    </script>
+</body>
+</html>

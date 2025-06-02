@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gambit - Premium Gaming Platform</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f1115 0%, #1e2129 100%);
+      color: #f4f4f4;
+      min-height: 100vh;
+    }
+
+    .header {
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 1.5rem 2rem;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-size: 2.2rem;
+      font-weight: 800;
+      background: linear-gradient(45deg, #FFD700, #DAA520);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .main-container {
+      max-width: 1200px;
+      margin: 140px auto 60px;
+      padding: 0 20px;
+    }
+
+    .hero-section {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 20px;
+      padding: 60px 30px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: 800;
+      background: linear-gradient(45deg, #FFD700, #FFA500);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 20px;
+    }
+
+    .hero-subtitle {
+      font-size: 1.3rem;
+      color: #bcbcbc;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 40px;
+      margin-top: 60px;
+    }
+
+    .game-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: all 0.4s ease;
+      position: relative;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .game-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 45px rgba(255, 215, 0, 0.2);
+      border-color: rgba(255, 215, 0, 0.3);
+    }
+
+    .game-image {
+      height: 220px;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #FFD700, #FF8C00);
+    }
+
+    .game-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .game-card:hover .game-image img {
+      transform: scale(1.1);
+    }
+
+    .game-image::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 140, 0, 0.3));
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .game-card:hover .game-image::after {
+      opacity: 1;
+    }
+
+    .game-content {
+      padding: 25px;
+    }
+
+    .game-title {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+
+    .game-description {
+      font-size: 1rem;
+      color: #c2c2c2;
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+
+    .play-btn {
+      display: inline-block;
+      background: linear-gradient(45deg, #FFD700, #FF8C00);
+      color: #1e2129;
+      padding: 12px 28px;
+      font-weight: 600;
+      border-radius: 30px;
+      text-decoration: none;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .play-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+    }
+
+    .footer {
+      text-align: center;
+      padding: 25px 0;
+      background: rgba(255, 255, 255, 0.02);
+      color: #888;
+      margin-top: 60px;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2.2rem;
+      }
+
+      .games-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="nav-container">
+      <div class="logo">🎮 Gambit</div>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <section class="hero-section">
+      <h1 class="hero-title">Welcome to Gambit</h1>
+      <p class="hero-subtitle">
+        Discover elite gaming experiences designed for those who play to win. Premium, polished, and powerful.
+      </p>
+    </section>
+
+    <div class="games-grid">
+      <div class="game-card">
+        <div class="game-image">
+          <img src="https://a57.foxsports.com/statics.foxsports.com/www.foxsports.com/content/uploads/2024/09/1294/728/24mlb_ohtani-50-50-art_16x9-post.jpg?ve=1&tl=1" alt="Dice betting game" />
+        </div>
+        <div class="game-content">
+          <h3 class="game-title">50-50 Betting</h3>
+          <p class="game-description">Bet smart. Flip a coin and double your stake with every correct guess.</p>
+          <a href="Toss.html" class="play-btn">Play Now</a>
+        </div>
+      </div>
+
+      <div class="game-card">
+        <div class="game-image">
+          <img src="https://www.jbsagolf.com/blogs/wp-content/uploads/2025/02/colour-prediction-game.jpg" alt="Color prediction game" />
+        </div>
+        <div class="game-content">
+          <h3 class="game-title">Color Prediction</h3>
+          <p class="game-description">Predict. Win. Repeat. Guess the color and multiply your success.</p>
+          <a href="ColourPrediction.html" class="play-btn">Play Now</a>
+        </div>
+      </div>
+
+      <div class="game-card">
+        <div class="game-image">
+          <img src="https://img.freepik.com/premium-psd/chess-tournament-flyer-template-premium-psd_25996-1723.jpg?semt=ais_items_boosted&w=740" alt="Premium chess game" />
+        </div>
+        <div class="game-content">
+          <h3 class="game-title">Premium Chess</h3>
+          <p class="game-description">Mastermind your moves and outplay opponents in our elite chess mode.</p>
+          <a href="chess.html" class="play-btn">Play Now</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>© 2025 Gambit Gaming Platform. All rights reserved.</p>
+  </footer>
+</body>
+</html>
