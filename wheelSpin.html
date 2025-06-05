@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luxury Wheel of Fortune</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 3.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ffd700, #ffed4e, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            margin-bottom: 10px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.5)); }
+            to { filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.8)); }
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #c0c0c0;
+            margin-bottom: 20px;
+        }
+
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .wheel-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .wheel-frame {
+            position: relative;
+            width: 450px;
+            height: 450px;
+            margin-bottom: 30px;
+        }
+
+        .wheel-svg {
+            width: 100%;
+            height: 100%;
+            transition: transform 4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.5));
+        }
+
+        .wheel-outer-ring {
+            fill: none;
+            stroke: #ffd700;
+            stroke-width: 8;
+            filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
+        }
+
+        .wheel-inner-ring {
+            fill: none;
+            stroke: #ffed4e;
+            stroke-width: 4;
+        }
+
+        .segment-text {
+            font-family: 'Arial', sans-serif;
+            font-weight: bold;
+            font-size: 16px;
+            text-anchor: middle;
+            dominant-baseline: middle;
+            fill: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+        }
+
+        .jackpot-text {
+            font-size: 14px;
+            font-weight: 900;
+            fill: #000;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+        }
+
+        .pointer {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
+        .pointer-svg {
+            width: 50px;
+            height: 50px;
+            filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.6));
+        }
+
+        .center-hub {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffa500 100%);
+            border-radius: 50%;
+            border: 4px solid #fff;
+            z-index: 5;
+            box-shadow: 
+                0 10px 25px rgba(0, 0, 0, 0.4),
+                inset 0 3px 8px rgba(255, 255, 255, 0.3);
+        }
+
+        .center-hub::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 25px;
+            height: 25px;
+            background: radial-gradient(circle, #fff 0%, #ffd700 100%);
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .betting-panel {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .balance-display {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: linear-gradient(45deg, rgba(255, 215, 0, 0.2), rgba(255, 237, 78, 0.1));
+            border-radius: 15px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .balance-label {
+            font-size: 0.9rem;
+            color: #c0c0c0;
+            margin-bottom: 5px;
+        }
+
+        .balance-amount {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .bet-section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #ffd700;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .bet-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .bet-option {
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .bet-option:hover {
+            background: linear-gradient(45deg, rgba(255, 215, 0, 0.2), rgba(255, 237, 78, 0.1));
+            border-color: #ffd700;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .bet-option.selected {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #000;
+            border-color: #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+        }
+
+        .bet-amount {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .bet-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .bet-input:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .quick-bet {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .quick-bet-btn {
+            flex: 1;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quick-bet-btn:hover {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #ffd700;
+        }
+
+        .spin-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #000;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
+            margin-bottom: 15px;
+        }
+
+        .spin-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.6);
+        }
+
+        .spin-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .result-display {
+            text-align: center;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-win {
+            background: linear-gradient(45deg, rgba(0, 255, 0, 0.2), rgba(0, 200, 0, 0.1));
+            border: 2px solid rgba(0, 255, 0, 0.4);
+            color: #00ff00;
+        }
+
+        .result-lose {
+            background: linear-gradient(45deg, rgba(255, 0, 0, 0.2), rgba(200, 0, 0, 0.1));
+            border: 2px solid rgba(255, 0, 0, 0.4);
+            color: #ff6b6b;
+        }
+
+        .jackpot-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 215, 0, 0.1);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: jackpotFlash 1s ease-in-out;
+        }
+
+        @keyframes jackpotFlash {
+            0%, 100% { background: rgba(255, 215, 0, 0.1); }
+            50% { background: rgba(255, 215, 0, 0.3); }
+        }
+
+        .jackpot-text-display {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            animation: pulse 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+
+        @media (max-width: 768px) {
+            .game-area {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .wheel-frame {
+                width: 350px;
+                height: 350px;
+            }
+            
+            .title {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1 class="title">WHEEL OF FORTUNE</h1>
+            <p class="subtitle">Luxury Casino Experience</p>
+        </div>
+
+        <div class="game-area">
+            <div class="wheel-container">
+                <div class="wheel-frame">
+                    <div class="pointer">
+                        <svg class="pointer-svg" viewBox="0 0 50 50">
+                            <defs>
+                                <linearGradient id="pointerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#ffd700"/>
+                                    <stop offset="50%" style="stop-color:#ffed4e"/>
+                                    <stop offset="100%" style="stop-color:#ffa500"/>
+                                </linearGradient>
+                            </defs>
+                            <polygon points="25,5 35,25 15,25" fill="url(#pointerGradient)" stroke="#fff" stroke-width="2"/>
+                            <circle cx="25" cy="30" r="8" fill="url(#pointerGradient)" stroke="#fff" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    
+                    <svg class="wheel-svg" id="wheelSvg" viewBox="0 0 400 400">
+                        <defs>
+                            <filter id="glow">
+                                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                                <feMerge> 
+                                    <feMergeNode in="coloredBlur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                        </defs>
+                        <!-- Wheel segments will be inserted here -->
+                        <circle cx="200" cy="200" r="195" class="wheel-outer-ring"/>
+                        <circle cx="200" cy="200" r="185" class="wheel-inner-ring"/>
+                    </svg>
+                    
+                    <div class="center-hub"></div>
+                </div>
+                
+                <button class="spin-btn" id="spinBtn">SPIN THE WHEEL</button>
+            </div>
+
+            <div class="betting-panel">
+                <div class="balance-display">
+                    <div class="balance-label">Your Balance</div>
+                    <div class="balance-amount" id="balance">$1,000</div>
+                </div>
+
+                <div class="bet-section">
+                    <div class="section-title">Choose Your Bet</div>
+                    <div class="bet-options" id="betOptions">
+                        <!-- Bet options will be generated by JavaScript -->
+                    </div>
+                </div>
+
+                <div class="bet-section">
+                    <div class="section-title">Bet Amount</div>
+                    <div class="bet-amount">
+                        <input type="number" class="bet-input" id="betInput" placeholder="Enter amount" min="1" value="10">
+                    </div>
+                    <div class="quick-bet">
+                        <button class="quick-bet-btn" onclick="setBetAmount(10)">$10</button>
+                        <button class="quick-bet-btn" onclick="setBetAmount(25)">$25</button>
+                        <button class="quick-bet-btn" onclick="setBetAmount(50)">$50</button>
+                        <button class="quick-bet-btn" onclick="setBetAmount(100)">$100</button>
+                    </div>
+                </div>
+
+                <div class="result-display" id="resultDisplay">
+                    Place your bet and spin to win!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="jackpot-animation" id="jackpotAnimation">
+        <div class="jackpot-text-display">JACKPOT!</div>
+    </div>
+
+    <script>
+        const segments = [
+            { text: '2x', multiplier: 2, color: '#e74c3c' },
+            { text: '5x', multiplier: 5, color: '#3498db' },
+            { text: '10x', multiplier: 10, color: '#2ecc71' },
+            { text: '2x', multiplier: 2, color: '#f39c12' },
+            { text: '1x', multiplier: 50, color: '#ffd700' },
+            { text: '3x', multiplier: 3, color: '#9b59b6' },
+            { text: '5x', multiplier: 5, color: '#e67e22' },
+            { text: '2x', multiplier: 2, color: '#34495e' },
+            { text: '10x', multiplier: 10, color: '#16a085' },
+            { text: '0x', multiplier: 'double', color: '#ff6b6b' },
+            { text: '3x', multiplier: 3, color: '#4ecdc4' },
+            { text: '5x', multiplier: 5, color: '#45b7d1' },
+            { text: '2x', multiplier: 2, color: '#f8b500' },
+            { text: '10x', multiplier: 10, color: '#6c5ce7' },
+            { text: '3x', multiplier: 3, color: '#fd79a8' },
+            { text: '7x', multiplier: 100, color: '#ffd700' }
+        ];
+
+        let balance = 1000;
+        let selectedBets = [];
+        let isSpinning = false;
+        let doubleSpinActive = false;
+
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        function createWheel() {
+            const wheelSvg = document.getElementById('wheelSvg');
+            const centerX = 200;
+            const centerY = 200;
+            const radius = 180;
+            const anglePerSegment = 360 / segments.length;
+
+            segments.forEach((segment, index) => {
+                const startAngle = index * anglePerSegment - 90; // Start from top
+                const endAngle = (index + 1) * anglePerSegment - 90;
+                
+                // Convert angles to radians
+                const startRad = (startAngle * Math.PI) / 180;
+                const endRad = (endAngle * Math.PI) / 180;
+                
+                // Calculate path coordinates
+                const x1 = centerX + radius * Math.cos(startRad);
+                const y1 = centerY + radius * Math.sin(startRad);
+                const x2 = centerX + radius * Math.cos(endRad);
+                const y2 = centerY + radius * Math.sin(endRad);
+                
+                // Create segment path
+                const largeArc = anglePerSegment > 180 ? 1 : 0;
+                const pathData = [
+                    `M ${centerX} ${centerY}`,
+                    `L ${x1} ${y1}`,
+                    `A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2}`,
+                    'Z'
+                ].join(' ');
+                
+                // Create segment element
+                const segmentPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                segmentPath.setAttribute('d', pathData);
+                segmentPath.setAttribute('fill', segment.color);
+                segmentPath.setAttribute('stroke', '#fff');
+                segmentPath.setAttribute('stroke-width', '2');
+                
+                // Add gradient for special segments
+                if (segment.text === 'JACKPOT') {
+                    const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+                    gradient.setAttribute('id', `jackpot-gradient-${index}`);
+                    gradient.innerHTML = `
+                        <stop offset="0%" style="stop-color:#ffd700"/>
+                        <stop offset="50%" style="stop-color:#ffed4e"/>
+                        <stop offset="100%" style="stop-color:#ffa500"/>
+                    `;
+                    wheelSvg.querySelector('defs').appendChild(gradient);
+                    segmentPath.setAttribute('fill', `url(#jackpot-gradient-${index})`);
+                    segmentPath.setAttribute('filter', 'url(#glow)');
+                }
+                
+                wheelSvg.appendChild(segmentPath);
+                
+                // Add text
+                const textAngle = startAngle + anglePerSegment / 2;
+                const textRad = (textAngle * Math.PI) / 180;
+                const textRadius = radius * 0.7;
+                const textX = centerX + textRadius * Math.cos(textRad);
+                const textY = centerY + textRadius * Math.sin(textRad);
+                
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', textX);
+                text.setAttribute('y', textY);
+                text.setAttribute('class', segment.text === 'JACKPOT' ? 'segment-text jackpot-text' : 'segment-text');
+                text.setAttribute('transform', `rotate(${textAngle + 90}, ${textX}, ${textY})`);
+                text.textContent = segment.text;
+                
+                wheelSvg.appendChild(text);
+            });
+        }
+
+        function createBetOptions() {
+            const betOptionsContainer = document.getElementById('betOptions');
+            const uniqueMultipliers = [...new Set(segments.map(s => s.multiplier))].filter(m => typeof m === 'number');
+            
+            uniqueMultipliers.forEach(multiplier => {
+                const option = document.createElement('div');
+                option.className = 'bet-option';
+                option.textContent = `${multiplier}x`;
+                option.dataset.multiplier = multiplier;
+                option.addEventListener('click', () => toggleBetOption(option, multiplier));
+                betOptionsContainer.appendChild(option);
+            });
+
+            // Add special bets
+            const jackpotOption = document.createElement('div');
+            jackpotOption.className = 'bet-option';
+            jackpotOption.textContent = 'JACKPOT';
+            jackpotOption.dataset.multiplier = 'jackpot';
+            jackpotOption.addEventListener('click', () => toggleBetOption(jackpotOption, 'jackpot'));
+            betOptionsContainer.appendChild(jackpotOption);
+
+            const doubleSpinOption = document.createElement('div');
+            doubleSpinOption.className = 'bet-option';
+            doubleSpinOption.textContent = 'DOUBLE SPIN';
+            doubleSpinOption.dataset.multiplier = 'double';
+            doubleSpinOption.addEventListener('click', () => toggleBetOption(doubleSpinOption, 'double'));
+            betOptionsContainer.appendChild(doubleSpinOption);
+        }
+
+        function toggleBetOption(element, multiplier) {
+            if (element.classList.contains('selected')) {
+                element.classList.remove('selected');
+                selectedBets = selectedBets.filter(bet => bet !== multiplier);
+            } else {
+                element.classList.add('selected');
+                selectedBets.push(multiplier);
+            }
+        }
+
+        function setBetAmount(amount) {
+            document.getElementById('betInput').value = amount;
+        }
+
+        function updateBalance() {
+            document.getElementById('balance').textContent = `$${balance.toLocaleString()}`;
+        }
+
+        function spin() {
+            if (isSpinning) return;
+            
+            const betAmount = parseInt(document.getElementById('betInput').value) || 0;
+            
+            if (betAmount <= 0) {
+                showResult('Please enter a valid bet amount!', false);
+                return;
+            }
+            
+            if (betAmount > balance) {
+                showResult('Insufficient balance!', false);
+                return;
+            }
+            
+            if (selectedBets.length === 0) {
+                showResult('Please select at least one bet!', false);
+                return;
+            }
+
+            isSpinning = true;
+            balance -= betAmount;
+            updateBalance();
+
+            const wheelSvg = document.getElementById('wheelSvg');
+            const spinBtn = document.getElementById('spinBtn');
+            spinBtn.disabled = true;
+            spinBtn.textContent = 'SPINNING...';
+
+            // Calculate random spin
+            const spins = 5 + Math.random() * 5; // 5-10 full rotations
+            const randomAngle = Math.random() * 360;
+            const totalRotation = spins * 360 + randomAngle;
+
+            wheelSvg.style.transform = `rotate(${totalRotation}deg)`;
+
+            setTimeout(() => {
+                // Calculate which segment was hit
+                const normalizedAngle = (360 - (totalRotation % 360)) % 360;
+                const segmentAngle = 360 / segments.length;
+                const hitSegment = Math.floor(normalizedAngle / segmentAngle);
+                const result = segments[hitSegment];
+
+                processResult(result, betAmount);
+                
+                isSpinning = false;
+                spinBtn.disabled = false;
+                spinBtn.textContent = doubleSpinActive ? 'DOUBLE SPIN!' : 'SPIN THE WHEEL';
+                
+                if (doubleSpinActive) {
+                    doubleSpinActive = false;
+                }
+            }, 4000);
+        }
+
+        function processResult(result, betAmount) {
+            let winnings = 0;
+            let isWin = false;
+            let message = '';
+
+            if (result.multiplier === 'double') {
+                doubleSpinActive = true;
+                message = 'DOUBLE SPIN! Spin again for free!';
+                balance += betAmount; // Refund the bet
+                showResult(message, true);
+                return;
+            }
+
+            // Check if any selected bets match the result
+            if (result.text === 'JACKPOT' && selectedBets.includes('jackpot')) {
+                winnings = betAmount * result.multiplier;
+                isWin = true;
+                message = `JACKPOT! You won $${winnings.toLocaleString()}!`;
+                showJackpotAnimation();
+            } else if (selectedBets.includes(result.multiplier)) {
+                winnings = betAmount * result.multiplier;
+                isWin = true;
+                message = `You won $${winnings.toLocaleString()}! (${result.multiplier}x)`;
+            } else {
+                message = `You hit ${result.text} but didn't bet on it. Better luck next time!`;
+            }
+
+            if (isWin) {
+                balance += winnings;
+                updateBalance();
+            }
+
+            showResult(message, isWin);
+        }
+
+        function showResult(message, isWin) {
+            const resultDisplay = document.getElementById('resultDisplay');
+            resultDisplay.textContent = message;
+            resultDisplay.className = `result-display ${isWin ? 'result-win' : 'result-lose'}`;
+        }
+
+        function showJackpotAnimation() {
+            const jackpotAnimation = document.getElementById('jackpotAnimation');
+            jackpotAnimation.style.display = 'flex';
+            
+            setTimeout(() => {
+                jackpotAnimation.style.display = 'none';
+            }, 3000);
+        }
+
+        // Initialize the game
+        createStars();
+        createWheel();
+        createBetOptions();
+        updateBalance();
+
+        // Event listeners
+        document.getElementById('spinBtn').addEventListener('click', spin);
+        
+        // Allow Enter key to spin
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !isSpinning) {
+                spin();
+            }
+        });
+    </script>
+</body>
+</html>
